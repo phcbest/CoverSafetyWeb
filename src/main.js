@@ -4,6 +4,7 @@ import router from './router'
 import vuetify from './plugins/vuetify'
 import leftLayout from '@/views/layout/left-layout'
 
+
 Vue.component("leftLayout", leftLayout)
 
 Vue.config.productionTip = false

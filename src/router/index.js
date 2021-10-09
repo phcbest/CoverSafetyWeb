@@ -19,16 +19,19 @@ export const routes = [
                 hidden: false,
                 path: "/home",
                 name: "主页",
+                icon:"mdi-home",
                 component: homeMain
             }, {
                 hidden: false,
                 path: "/log",
-                name: "日志界面",
+                name: "日志",
+                icon:"mdi-math-log",
                 component: logMain
             }, {
                 hidden: false,
                 path: "/warn",
                 name: "警告",
+                icon:"mdi-account-alert",
                 component: warnMain
             }]
 
