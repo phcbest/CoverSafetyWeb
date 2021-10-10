@@ -47,7 +47,7 @@
 
     export default {
         data: () => ({
-            image: "https://z3.ax1x.com/2021/10/09/5iNznA.png",
+            image: "https://z3.ax1x.com/2021/10/10/5A120x.png",
             routerList: "",
             selectedItem: 0
         }),

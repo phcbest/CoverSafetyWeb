@@ -1,23 +1,105 @@
 <template>
     <div>
         <div id="container"></div>
+        <template>
+            <v-card
+                    v-show="showCoverInfoCard"
+                    class="cover-info-box mx-auto my-12"
+                    max-width="300">
+
+                <v-card-title>井盖信息</v-card-title>
+
+                <v-card-text>
+                    <div>
+                        <b>井盖UUID:</b><br>{{coverInfo.uid}}<br>
+                        <b>经纬度:</b><br>{{coverInfo.coverLongLat}}<br>
+                        <b>气体状态:</b>
+                        <v-chip
+                                v-if="coverInfo.coverGasStatus===0"
+                                class="ma-2"
+                                small
+                                color="green"
+                                label
+                                text-color="white">
+                            正常
+                        </v-chip>
+                        <v-chip
+                                v-else
+                                class="ma-2"
+                                color="red"
+                                small
+                                label
+                                text-color="white">
+                            异常
+                        </v-chip>
+                        <br>
+                        <b>倾斜状态:</b>
+                        <v-chip
+                                v-if="coverInfo.coverSensorStatus===0"
+                                class="ma-2"
+                                color="green"
+                                label
+                                small
+                                text-color="white">
+                            正常
+                        </v-chip>
+                        <v-chip
+                                v-else
+                                class="ma-2"
+                                color="red"
+                                label
+                                small
+                                text-color="white">
+                            异常
+                        </v-chip>
+                    </div>
+                </v-card-text>
+                <v-divider class="mx-4"></v-divider>
+                <v-card-text>
+                    <v-text-field
+                            text="coverInfo.coverRoad"
+                            label="井盖道路信息"
+                            color="pink"
+                            :value="coverInfo.coverRoad"
+                    ></v-text-field>
+                </v-card-text>
+                <v-card-actions>
+                    <v-btn
+                            color="pink lighten-2"
+                            text
+                            @click="updateRoadInfo">
+                        修改
+                    </v-btn>
+                </v-card-actions>
+            </v-card>
+        </template>
     </div>
 </template>
 
 <script>
     import {mapValue} from '@/tools/AMapValue'
-
     import AMapLoader from "@amap/amap-jsapi-loader";
+
+    const axios = require('axios').default;
 
     export default {
         data: () => ({
-            loading: false,
             selection: 1,
-            map: null
+            AMap: null,
+            showCoverInfoCard: false,
+            coverInfo: {
+                uid: "d04b71cb-b313-4610-8a41-90cfe4e4d1fa",
+                coverRoad: "新余学院主教A",
+                coverSensorStatus: 0,
+                coverLoastime: 1629333999312,
+                coverLongLat: "114.999447-27.852305",
+                coverGasStatus: 0
+            }
         }),
         methods: {
             showMap: function () {
                 AMapLoader.load(mapValue).then((AMap) => {
+                    this.AMap = AMap;
                     this.map = new AMap.Map('container', {
                         zoom: 14,//级别
                         center: [114.995512, 27.858499],//中心点坐标
@@ -25,23 +107,61 @@
                     });
                     var styleName = "amap://styles/macaron";
                     this.map.setMapStyle(styleName);
+                    this.showAllMarker();
                 }).catch(e => {
                     console.log(e);
                 })
+            },
+            showAllMarker: function () {
+                //网络请求获得井盖
+                var config = {
+                    method: 'get',
+                    url: '/work/coverinfo/list?limit=10&page=1',
+                    headers: {}
+                };
+                //将this全局变量本地化方便回调调用，回调中的this是axios
+                const that = this;
+                axios(config)
+                    .then(function (response) {
+                        console.log(response)
+                        if (response.data.msg === 'success' || response.data.page.list.length > 0) {
+                            for (let i = 0; i < response.data.page.list.length; i++) {
+                                that.addMarker(response.data.page.list[i]);
+                            }
+                        }
+                    })
+                    .catch(function (error) {
+                        console.log(error);
+                    });
+            },
+            addMarker: function (info) {
+                var marker = new this.AMap.Marker({
+                    icon: "cover.svg",
+                    position: info.coverLongLat.split("-"),
+                    anchor: 'bottom-center'
+                });
+                this.map.add(marker);
+
+                var that = this;
+                marker.on('click', () => {
+                    console.log(info);
+                    //修改井盖详细界面
+                    that.showCoverInfoCard = true;
+                    that.coverInfo = info;
+                });
+            },
+            updateRoadInfo: function () {
+                // todo 提交修改井盖道路信息
+
             }
         },
         mounted: function () {
             //设置图像高度
             let leftLayoutView = document.getElementsByClassName("v-navigation-drawer__content");
             let innerHeight = leftLayoutView[0].offsetHeight;
-            console.log(innerHeight)
+            // console.log(innerHeight)
             document.getElementById("container").style.height = innerHeight + "px";
             this.showMap();
-            //todo 网络请求否添加对应的marker
-            //https://lbs.amap.com/demo/jsapi-v2/example/map-componets/map-overlays
-            // this.map.add(marker);
-            // this.map.setFitView();
-
         }
     }
 </script>
@@ -50,6 +170,13 @@
     #container {
         width: 100%;
         height: 400px;
+    }
+
+    /*用于设置绝对定位浮动*/
+    .cover-info-box {
+        position: absolute;
+        right: 30px;
+        top: 1px;
     }
 
 
