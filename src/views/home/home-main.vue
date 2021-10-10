@@ -3,7 +3,7 @@
         <div id="container"></div>
         <template>
             <v-card
-                    v-show="showCoverInfoCard"
+                    v-show="coverInfoCardVisibility"
                     class="cover-info-box mx-auto my-12"
                     max-width="300">
 
@@ -60,18 +60,71 @@
                             text="coverInfo.coverRoad"
                             label="井盖道路信息"
                             color="pink"
-                            :value="coverInfo.coverRoad"
+                            v-model="coverInfo.coverRoad"
                     ></v-text-field>
                 </v-card-text>
                 <v-card-actions>
                     <v-btn
                             color="pink lighten-2"
                             text
-                            @click="updateRoadInfo">
+                            @click="dialogVisibility = true">
                         修改
                     </v-btn>
                 </v-card-actions>
             </v-card>
+        </template>
+        <template>
+            <v-dialog
+                    v-model="dialogVisibility"
+                    width="500">
+                <v-card>
+                    <v-card-title class="text-h5 pink lighten-2">
+                        警告
+                    </v-card-title>
+                    <br>
+                    <v-card-text>
+                        确定修改uuid为
+                        <b>{{coverInfo.uid}}</b>井盖的街道信息为
+                        <b>{{coverInfo.coverRoad}}</b>吗
+                    </v-card-text>
+
+                    <v-card-actions>
+                        <v-spacer></v-spacer>
+                        <v-btn
+                                color="pink"
+                                text
+                                @click="updateRoadInfo">
+                            确定
+                        </v-btn>
+                        <v-btn
+                                color="primary"
+                                text
+                                @click="dialogVisibility = false">
+                            取消
+                        </v-btn>
+                    </v-card-actions>
+                </v-card>
+            </v-dialog>
+        </template>
+        <template>
+            <v-dialog
+                    v-model="progressVisibility"
+                    hide-overlay
+                    persistent
+                    width="300">
+                <v-card
+                        color="#e91e63"
+                        dark>
+                    <v-card-text>
+                        稍等一会…………
+                        <v-progress-linear
+                                indeterminate
+                                color="white"
+                                class="mb-0"
+                        ></v-progress-linear>
+                    </v-card-text>
+                </v-card>
+            </v-dialog>
         </template>
     </div>
 </template>
@@ -86,7 +139,9 @@
         data: () => ({
             selection: 1,
             AMap: null,
-            showCoverInfoCard: false,
+            coverInfoCardVisibility: false,
+            dialogVisibility: false,
+            progressVisibility: false,
             coverInfo: {
                 uid: "d04b71cb-b313-4610-8a41-90cfe4e4d1fa",
                 coverRoad: "新余学院主教A",
@@ -146,13 +201,39 @@
                 marker.on('click', () => {
                     console.log(info);
                     //修改井盖详细界面
-                    that.showCoverInfoCard = true;
+                    that.coverInfoCardVisibility = true;
                     that.coverInfo = info;
                 });
             },
             updateRoadInfo: function () {
-                // todo 提交修改井盖道路信息
+                console.log(this.coverInfo);
+                this.dialogVisibility = false;
+                //网络请求，修改井盖数据
+                this.progressVisibility = true;
 
+                var config = {
+                    method: 'post',
+                    url: '/work/coverinfo/update',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    data: {
+                        coverRoad: this.coverInfo.coverRoad,
+                        uid: this.coverInfo.uid
+                    }
+                };
+                let that = this;
+                axios(config)
+                    .then(function (response) {
+                        console.log(JSON.stringify(response.data));
+                        that.progressVisibility = false;
+                        //刷新显示
+                        that.showMap();
+                    })
+                    .catch(function (error) {
+                        console.log(error);
+                        that.progressVisibility = false;
+                    });
             }
         },
         mounted: function () {
@@ -177,6 +258,10 @@
         position: absolute;
         right: 30px;
         top: 1px;
+    }
+
+    .v-dialog .v-card__title {
+        color: floralwhite;
     }
 
 
