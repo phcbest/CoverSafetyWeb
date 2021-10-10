@@ -142,6 +142,7 @@
             coverInfoCardVisibility: false,
             dialogVisibility: false,
             progressVisibility: false,
+            userMarkers: [],
             coverInfo: {
                 uid: "d04b71cb-b313-4610-8a41-90cfe4e4d1fa",
                 coverRoad: "新余学院主教A",
@@ -168,17 +169,20 @@
                 })
             },
             showAllMarker: function () {
+                //将this全局变量本地化方便回调调用，回调中的this是axios
+                const that = this;
+                //要先删除之前的标点
+                that.map.remove(that.userMarkers);
+                that.userMarkers = [];
                 //网络请求获得井盖
                 var config = {
                     method: 'get',
                     url: '/work/coverinfo/list?limit=10&page=1',
                     headers: {}
                 };
-                //将this全局变量本地化方便回调调用，回调中的this是axios
-                const that = this;
+
                 axios(config)
                     .then(function (response) {
-                        console.log(response)
                         if (response.data.msg === 'success' || response.data.page.list.length > 0) {
                             for (let i = 0; i < response.data.page.list.length; i++) {
                                 that.addMarker(response.data.page.list[i]);
@@ -196,7 +200,7 @@
                     anchor: 'bottom-center'
                 });
                 this.map.add(marker);
-
+                this.userMarkers.push(marker);
                 var that = this;
                 marker.on('click', () => {
                     console.log(info);
@@ -228,7 +232,7 @@
                         console.log(JSON.stringify(response.data));
                         that.progressVisibility = false;
                         //刷新显示
-                        that.showMap();
+                        that.showAllMarker();
                     })
                     .catch(function (error) {
                         console.log(error);
@@ -243,6 +247,8 @@
             // console.log(innerHeight)
             document.getElementById("container").style.height = innerHeight + "px";
             this.showMap();
+            //设置定时器用于刷新井盖定位
+            self.setInterval(this.showAllMarker, 10000);
         }
     }
 </script>
