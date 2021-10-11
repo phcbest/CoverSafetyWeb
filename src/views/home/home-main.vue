@@ -248,7 +248,7 @@
             document.getElementById("container").style.height = innerHeight + "px";
             this.showMap();
             //设置定时器用于刷新井盖定位
-            self.setInterval(this.showAllMarker, 10000);
+            // self.setInterval(this.showAllMarker, 10000);
         }
     }
 </script>
