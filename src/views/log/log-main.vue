@@ -47,7 +47,6 @@
                             :categories="categories"
                             :events="events"
                             :event-color="getEventColor"
-                            @change="fetchEvents"
                     ></v-calendar>
                 </v-sheet>
             </v-card>
@@ -58,12 +57,12 @@
             <v-card>
                 <v-list dense three-line>
                     <v-list-item-group
-                            color="pink">
-                        <template v-for="(record, index) in records">
-
-                            <v-list-item :key="index">
+                            color="pink" v-if="logPage">
+                        <template v-for="(record, index) in logPage.page.records">
+                            <v-list-item :key="record.coverUid+index">
                                 <v-list-item-content>
                                     <v-list-item-title v-text="itemTitle(record)"/>
+                                    <v-list-item-subtitle v-text="new Date(record.logTime).toString()"/>
                                     <v-list-item-subtitle v-text="itemSubTitle(record)"/>
                                 </v-list-item-content>
                             </v-list-item>
@@ -75,10 +74,12 @@
                 <!--            数据迭代器-->
                 <v-card-text>
                     <v-pagination
-                            v-model="page"
+                            v-if="logPage"
+                            v-model="logPage.page.current"
                             color="pink"
                             :total-visible="7"
-                            :length="9"
+                            :length="logPage.page.pages"
+                            @input="changePagination"
                     ></v-pagination>
                 </v-card-text>
 
@@ -93,20 +94,26 @@
 
     export default {
         data: () => ({
+            pagination: 0,
             focus: '',
             events: [],
             colors: ['blue', 'indigo', 'deep-purple', 'cyan', 'green', 'orange', 'grey darken-1'],
             names: [],
             categories: ['井盖日志'],
-            records: [],
-            limitItem: 10
+            logPage: "",
         }),
         computed: {},
         mounted() {
-            this.$refs.calendar.checkChange()
+            this.fetchEvents();
+            this.$refs.calendar.checkChange();
+
         },
         methods: {
-            itemSubTitle: record => "时间:" + new Date(record.logTime).toString() + "——————log信息:" + record.log,
+            changePagination: function (info) {
+                console.log(info)
+                this.getLogByService(7, info, null);
+            },
+            itemSubTitle: record => "LOG信息:" + record.log,
             itemTitle: record => "UUID:" + record.coverUid,
             getEventColor(event) {
                 return event.color
@@ -120,27 +127,37 @@
             next() {
                 this.$refs.calendar.next()
             },
-            fetchEvents: function () {
-                const events = []
+            getLogByService: function (limit, page, success) {
                 var config = {
                     method: 'get',
-                    url: '/work/coverlog/list?page=1&limit=7',
+                    url: '/work/coverlog/list?page=' + page + '&limit=' + limit,
                     headers: {}
                 };
-                let that = this;
                 axios(config)
                     .then((response) => {
                         console.log("fetchEvents", response)
-                        if (response.data.msg === "success" && response.data.page.records.length > 0) {
-                            that.records = response.data.page.records;
-                            for (let i = 0; i < response.data.page.records.length; i++) {
-                                addEvent(response.data.page.records[i]);
-                            }
+                        this.logPage = response.data;
+                        if (success) {
+                            success();
                         }
                     })
                     .catch(function (error) {
                         console.log(error);
                     });
+            }, fetchEvents: function () {
+                const events = []
+                let that = this;
+
+                function success() {
+                    if (that.logPage.msg === "success" && that.logPage.page.records.length > 0) {
+                        that.records = that.logPage.page.records;
+                        for (let i = 0; i < that.logPage.page.records.length; i++) {
+                            addEvent(that.logPage.page.records[i]);
+                        }
+                    }
+                }
+
+                that.getLogByService(7, 1, success);
 
                 //添加event的逻辑
                 function addEvent(record) {
@@ -167,7 +184,7 @@
 <style>
     /*将display设置为行内元素 ，并且float*/
     .log-list-card {
-        width: 56%;
+        width: 66%;
         margin: 10px;
         display: inline-block !important;
         float: right;
@@ -175,7 +192,7 @@
 
     .left-calendar-box {
         margin: 10px;
-        width: 40%;
+        width: 30%;
         display: inline-block !important;
     }
 
