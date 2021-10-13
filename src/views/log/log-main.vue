@@ -71,7 +71,7 @@
                     </v-list-item-group>
 
                 </v-list>
-                <!--            数据迭代器-->
+                <!--页面选择器-->
                 <v-card-text>
                     <v-pagination
                             v-if="logPage"

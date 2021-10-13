@@ -71,7 +71,7 @@
                                 <template v-slot:header>
                                     <v-toolbar
                                             dark
-                                            color="blue darken-3"
+                                            color="pink darken-3"
                                             class="mb-1"
                                     >
                                         <v-text-field
@@ -102,7 +102,7 @@
                                                 <v-btn
                                                         large
                                                         depressed
-                                                        color="blue"
+                                                        color="pink"
                                                         :value="false"
                                                 >
                                                     <v-icon>mdi-arrow-up</v-icon>
@@ -110,7 +110,7 @@
                                                 <v-btn
                                                         large
                                                         depressed
-                                                        color="blue"
+                                                        color="pink"
                                                         :value="true"
                                                 >
                                                     <v-icon>mdi-arrow-down</v-icon>
@@ -142,12 +142,12 @@
                                                             v-for="(key, index) in filteredKeys"
                                                             :key="index"
                                                     >
-                                                        <v-list-item-content :class="{ 'blue--text': sortBy === key }">
+                                                        <v-list-item-content :class="{ 'pink--text': sortBy === key }">
                                                             {{ key }}:
                                                         </v-list-item-content>
                                                         <v-list-item-content
                                                                 class="align-end"
-                                                                :class="{ 'blue--text': sortBy === key }"
+                                                                :class="{ 'pink--text': sortBy === key }"
                                                         >
                                                             {{ item[key.toLowerCase()] }}
                                                         </v-list-item-content>
@@ -164,13 +164,13 @@
                                             align="center"
                                             justify="center"
                                     >
-                                        <span class="grey--text">Items per page</span>
+                                        <span class="grey--text">每页项目数量</span>
                                         <v-menu offset-y>
                                             <template v-slot:activator="{ on, attrs }">
                                                 <v-btn
                                                         dark
                                                         text
-                                                        color="primary"
+                                                        color="pink"
                                                         class="ml-2"
                                                         v-bind="attrs"
                                                         v-on="on"
@@ -192,16 +192,11 @@
 
                                         <v-spacer></v-spacer>
 
-                                        <span
-                                                class="mr-4
-              grey--text"
-                                        >
-              Page {{ page }} of {{ numberOfPages }}
-            </span>
+                                        <span class="mr-4 grey--text">页面 {{ page }} / {{ numberOfPages }}</span>
                                         <v-btn
                                                 fab
                                                 dark
-                                                color="blue darken-3"
+                                                color="pink darken-3"
                                                 class="mr-1"
                                                 @click="formerPage"
                                         >
@@ -210,7 +205,7 @@
                                         <v-btn
                                                 fab
                                                 dark
-                                                color="blue darken-3"
+                                                color="pink darken-3"
                                                 class="ml-1"
                                                 @click="nextPage"
                                         >
@@ -242,7 +237,6 @@
             itemsPerPage: 4,
             sortBy: 'name',
             keys: [
-                'Name',
                 'Calories',
                 'Fat',
                 'Carbs',
