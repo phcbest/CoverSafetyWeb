@@ -16,6 +16,8 @@ pnpm-debug.log*
 # Editor directories and files
 .idea
 .vscode
+#打包好的
+.dist
 *.suo
 *.ntvs*
 *.njsproj
