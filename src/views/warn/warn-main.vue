@@ -91,6 +91,13 @@
                 v-model="dialogVisibility"
                 max-width="600px">
             <v-card>
+                <v-progress-linear
+                        color="teal"
+                        buffer-value="0"
+                        v-if="files"
+                        :value="progressValue"
+                        stream>
+                </v-progress-linear>
                 <v-card-title>
                     <span class="text-h5">修改错误信息</span>
                     <span class="text--h6">{{selectErrorData.uid}}</span>
@@ -118,6 +125,7 @@
     export default {
         name: "warn-main",
         data: () => ({
+            progressValue: 0,
             files: null,
             errorData: "",
             selectErrorData: "",
@@ -158,7 +166,6 @@
                 this.dialogVisibility = true;
             },
             uploadInfo: function () {
-                this.dialogVisibility = false;
                 var FormData = require('form-data');
                 var data = new FormData();
                 data.append('file', this.files);
@@ -168,13 +175,19 @@
                     headers: {
                         'Content-Type': 'multipart/form-data',
                     },
-                    data: data
+                    data: data,
+                    onUploadProgress: (progressEvent) => {
+                        var x = (progressEvent.loaded / progressEvent.total) * 100;
+                        console.log(x)
+                        this.progressValue = x;
+                    }
                 };
 
                 axios(config)
                     .then((response) => {
                         console.log(JSON.stringify(response.data));
                         //刷新
+                        this.dialogVisibility = false;
                         this.getErrorData();
                     })
                     .catch((error) => {
